@@ -1,0 +1,60 @@
+{"tenant": "northwind", "question": "What is the warranty period for the frame?", "expected_doc": "warranty", "kind": "direct"}
+{"tenant": "northwind", "question": "How many days do I have to return an e-bike?", "expected_doc": "returns-and-refunds", "kind": "direct"}
+{"tenant": "northwind", "question": "What is the restocking fee for an e-bike that was assembled and ridden?", "expected_doc": "returns-and-refunds", "kind": "direct"}
+{"tenant": "northwind", "question": "How long does delivery of a complete bike take?", "expected_doc": "shipping-and-delivery", "kind": "direct"}
+{"tenant": "northwind", "question": "What is the deadline to report damage that happened in transit?", "expected_doc": "shipping-and-delivery", "kind": "direct"}
+{"tenant": "northwind", "question": "What temperature range is safe for charging the battery?", "expected_doc": "battery-care-and-safety", "kind": "direct"}
+{"tenant": "northwind", "question": "How much does a Full Service cost?", "expected_doc": "servicing-and-booking", "kind": "direct"}
+{"tenant": "northwind", "question": "Is the first tune-up free, and within how many days do I need to book it?", "expected_doc": "servicing-and-booking", "kind": "direct"}
+{"tenant": "northwind", "question": "What is the minimum purchase amount to qualify for financing?", "expected_doc": "financing", "kind": "direct"}
+{"tenant": "northwind", "question": "Is there a penalty for paying off my financing early?", "expected_doc": "financing", "kind": "direct"}
+{"tenant": "northwind", "question": "my bike's power pack died after a year, am I covered?", "expected_doc": "warranty", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "where's the ID number on the bike itself? support asked me for it", "expected_doc": "warranty", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "I've been riding it around the neighborhood for a week and I don't love it. Can I still send it back?", "expected_doc": "returns-and-refunds", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "I paid with my credit card. Once you get the bike back, how long until I see the money?", "expected_doc": "returns-and-refunds", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "I live in Honolulu, can you send me a bike?", "expected_doc": "shipping-and-delivery", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "Will I have to put the bike together myself when it shows up?", "expected_doc": "shipping-and-delivery", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "I'm not going to ride over the winter. What should I do with the battery until spring?", "expected_doc": "battery-care-and-safety", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "the light on the charger brick keeps blinking red really fast, is something wrong?", "expected_doc": "battery-care-and-safety", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "Can a mechanic come to my house instead of me hauling the bike to the shop?", "expected_doc": "servicing-and-booking", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "If I'm a few days late on a monthly installment for my bike, what will it cost me?", "expected_doc": "financing", "kind": "paraphrase"}
+{"tenant": "northwind", "question": "E-07 display error", "expected_doc": "servicing-and-booking", "kind": "keyword"}
+{"tenant": "northwind", "question": "NW-SN-0412", "expected_doc": "battery-care-and-safety", "kind": "keyword"}
+{"tenant": "northwind", "question": "NW-BAT-720 charging time", "expected_doc": "battery-care-and-safety", "kind": "keyword"}
+{"tenant": "northwind", "question": "Brightrail 36 month APR", "expected_doc": "financing", "kind": "keyword"}
+{"tenant": "northwind", "question": "TrailFreight redelivery fee", "expected_doc": "shipping-and-delivery", "kind": "keyword"}
+{"tenant": "northwind", "question": "What's the weather forecast in Denver this weekend?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "northwind", "question": "Do you sell electric scooters or skateboards?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "northwind", "question": "How do I reset my password on the Northwind website?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "northwind", "question": "Am I allowed to ride an e-bike in the bike lane in my state?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "northwind", "question": "Can you give me a good recipe for banana bread?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "ledgerly", "question": "How much does the Growth plan cost per month?", "expected_doc": "plans-and-billing", "kind": "direct"}
+{"tenant": "ledgerly", "question": "What happens if my subscription payment fails?", "expected_doc": "plans-and-billing", "kind": "direct"}
+{"tenant": "ledgerly", "question": "What is the refund window for my first payment?", "expected_doc": "refunds", "kind": "direct"}
+{"tenant": "ledgerly", "question": "Are monthly renewals refundable?", "expected_doc": "refunds", "kind": "direct"}
+{"tenant": "ledgerly", "question": "Which plans include SAML single sign-on?", "expected_doc": "sso-saml-setup", "kind": "direct"}
+{"tenant": "ledgerly", "question": "What clock skew tolerance do you allow for SAML assertions?", "expected_doc": "sso-saml-setup", "kind": "direct"}
+{"tenant": "ledgerly", "question": "How long do export download links stay valid?", "expected_doc": "data-export", "kind": "direct"}
+{"tenant": "ledgerly", "question": "What is the maximum page size for list endpoints in the API?", "expected_doc": "api-rate-limits", "kind": "direct"}
+{"tenant": "ledgerly", "question": "What is the retry schedule for failed webhook deliveries?", "expected_doc": "api-rate-limits", "kind": "direct"}
+{"tenant": "ledgerly", "question": "How long is the recovery period after I delete a workspace?", "expected_doc": "account-deletion-gdpr", "kind": "direct"}
+{"tenant": "ledgerly", "question": "We forgot to cancel and got charged for another whole year last week. Can we get that money back?", "expected_doc": "refunds", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "If we move up to the bigger tier halfway through the month, do we pay the full price right away?", "expected_doc": "plans-and-billing", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "Our team on the mid-tier plan is growing to 8 people. What do the extra people cost?", "expected_doc": "plans-and-billing", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "We want staff to log in with their company accounts instead of separate passwords. How do we set that up?", "expected_doc": "sso-saml-setup", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "I need a copy of all my invoices and my customer list so I can move to another tool", "expected_doc": "data-export", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "Can we have a backup file of our books sent to us automatically every week?", "expected_doc": "data-export", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "our integration keeps getting told to slow down, how many calls are we actually allowed?", "expected_doc": "api-rate-limits", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "Our server was down and missed some of your event notifications. Will you send them again?", "expected_doc": "api-rate-limits", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "For compliance our data has to stay in Europe. Is that possible?", "expected_doc": "account-deletion-gdpr", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "I want to see all the personal info you have on me. How long will it take you to reply?", "expected_doc": "account-deletion-gdpr", "kind": "paraphrase"}
+{"tenant": "ledgerly", "question": "LDG-429-BURST", "expected_doc": "api-rate-limits", "kind": "keyword"}
+{"tenant": "ledgerly", "question": "SAML-ASSERTION-EXPIRED", "expected_doc": "sso-saml-setup", "kind": "keyword"}
+{"tenant": "ledgerly", "question": "LDG-EXPORT-BUSY 409", "expected_doc": "data-export", "kind": "keyword"}
+{"tenant": "ledgerly", "question": "X-RateLimit-Reset header", "expected_doc": "api-rate-limits", "kind": "keyword"}
+{"tenant": "ledgerly", "question": "DPA Standard Contractual Clauses", "expected_doc": "account-deletion-gdpr", "kind": "keyword"}
+{"tenant": "ledgerly", "question": "How do I file my quarterly estimated taxes with the IRS?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "ledgerly", "question": "Is there a Ledgerly app I can install on my phone?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "ledgerly", "question": "What's the best laptop for running accounting software?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "ledgerly", "question": "Can Ledgerly run payroll for my employees?", "expected_doc": null, "kind": "out_of_scope"}
+{"tenant": "ledgerly", "question": "Who won the football game last night?", "expected_doc": null, "kind": "out_of_scope"}

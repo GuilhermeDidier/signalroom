@@ -1,0 +1,219 @@
+/* Fictional customer sites. Deliberately NOT the Signalroom console style. */
+
+/* ---------- Northwind Cycles ---------- */
+.nw {
+  --nw-ink: #0e1b1a;
+  --nw-teal: #0f7b6c;
+  --nw-sun: #f4c430;
+  --nw-mint: #e6f3ef;
+  background: #fff;
+  color: var(--nw-ink);
+  font-family: var(--nw-font), system-ui, sans-serif;
+}
+.nwNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px clamp(16px, 4vw, 56px);
+}
+.nwLogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-stretch: 112%;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+.nwLinks { display: flex; gap: 28px; font-weight: 600; font-size: 15px; }
+.nwHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 24px;
+  padding: 24px clamp(16px, 4vw, 56px) 40px;
+  background: var(--nw-mint);
+}
+.nwCopy { display: grid; gap: 18px; }
+.nwKicker {
+  justify-self: start;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--nw-ink);
+  color: var(--nw-sun);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.nwH1 {
+  font-size: clamp(46px, 6.4vw, 92px);
+  font-weight: 900;
+  font-stretch: 125%;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.nwLede { font-size: 18px; max-width: 42ch; line-height: 1.5; }
+.nwCtas { display: flex; flex-wrap: wrap; gap: 12px; }
+.nwBtn,
+.nwBtnAlt {
+  padding: 14px 22px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 16px;
+}
+.nwBtn { background: var(--nw-teal); color: #fff; }
+.nwBtnAlt { background: #fff; color: var(--nw-ink); box-shadow: inset 0 0 0 2px var(--nw-ink); }
+.nwArt svg { width: 100%; height: auto; display: block; }
+.nwPerks {
+  list-style: none;
+  margin: 0;
+  padding: 18px clamp(16px, 4vw, 56px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 24px;
+  background: var(--nw-ink);
+  color: #fff;
+  font-size: 15px;
+}
+.nwPerks b { color: var(--nw-sun); font-stretch: 115%; }
+.nwModels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  padding: 0 clamp(16px, 4vw, 56px);
+}
+.nwModel { padding: 28px 24px 30px 0; }
+.nwModel + .nwModel { padding-left: 24px; box-shadow: inset 2px 0 0 var(--nw-mint); }
+.nwModelName { font-size: 40px; font-weight: 900; font-stretch: 125%; letter-spacing: -0.02em; }
+.nwModelKind { font-weight: 600; color: #3d5452; }
+.nwModelMeta { display: flex; gap: 16px; margin-top: 10px; font-weight: 700; }
+.nwModelMeta span + span { color: var(--nw-teal); }
+
+.askNw { background: var(--nw-sun); }
+.askNw .askList button { background: #fff; color: var(--nw-ink); box-shadow: 0 3px 0 var(--nw-ink); border-radius: 14px; }
+.askNw .askList button:hover { transform: translateY(-2px); box-shadow: 0 5px 0 var(--nw-ink); }
+.askNw .askList small { color: var(--nw-teal); }
+.askNw .askTitle { font-weight: 900; font-stretch: 120%; }
+
+/* ---------- Ledgerly ---------- */
+.lg {
+  --lg-violet: #5b3fd6;
+  --lg-ink: #1b1530;
+  --lg-soft: #f4f1ff;
+  background: #fbfaff;
+  color: var(--lg-ink);
+  font-family: var(--lg-font), system-ui, sans-serif;
+}
+.lgNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px clamp(16px, 4vw, 64px);
+}
+.lgLogo { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 21px; letter-spacing: -0.02em; }
+.lgMark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--lg-violet);
+  color: #fff;
+  font-weight: 800;
+  transform: rotate(-8deg);
+}
+.lgLinks { display: flex; align-items: center; gap: 26px; font-size: 14.5px; font-weight: 500; }
+.lgSignin { padding: 7px 14px; border-radius: 8px; box-shadow: inset 0 0 0 1.5px #d6cff7; }
+.lgHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 48px;
+  align-items: center;
+  padding: 40px clamp(16px, 4vw, 64px) 56px;
+}
+.lgH1 { font-size: clamp(42px, 5.4vw, 76px); font-weight: 700; letter-spacing: -0.045em; line-height: 1; margin: 0 0 20px; }
+.lgH1 em { font-style: normal; color: var(--lg-violet); }
+.lgLede { font-size: 18px; line-height: 1.6; color: #4a4363; max-width: 46ch; }
+.lgCtas { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 26px; }
+.lgBtn { padding: 13px 22px; border-radius: 10px; background: var(--lg-violet); color: #fff; font-weight: 600; box-shadow: 0 8px 20px -8px rgba(91, 63, 214, 0.7); }
+.lgNote { font-size: 13.5px; color: #6a6386; }
+.lgInvoice {
+  padding: 24px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 30px 60px -30px rgba(40, 20, 110, 0.45), 0 0 0 1px #ebe6ff;
+  transform: rotate(2deg);
+  font-size: 14px;
+}
+.lgInvHead { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 16px; }
+.lgPaid { padding: 3px 10px; border-radius: 999px; background: #dff6e8; color: #14693a; font-size: 12px; font-weight: 700; }
+.lgInvTo { margin: 6px 0 16px; color: #6a6386; }
+.lgLines { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.lgLines li,
+.lgTotal { display: flex; justify-content: space-between; gap: 12px; }
+.lgLines li span:last-child,
+.lgTotal span:last-child { font-variant-numeric: tabular-nums; }
+.lgTotal { margin-top: 14px; padding-top: 14px; box-shadow: 0 -1.5px 0 var(--lg-soft); font-weight: 700; font-size: 18px; }
+.lgRemind { margin-top: 14px; padding: 8px 10px; border-radius: 8px; background: var(--lg-soft); color: var(--lg-violet); font-size: 12.5px; font-weight: 600; }
+.lgPlans {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0 clamp(16px, 4vw, 64px) 48px;
+}
+.lgPlan { padding: 22px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px #ebe6ff; }
+.lgPlan:nth-child(2) { background: var(--lg-ink); color: #fff; box-shadow: none; }
+.lgPlanName { font-weight: 600; }
+.lgPlanPrice { font-size: 40px; font-weight: 700; letter-spacing: -0.04em; margin: 6px 0; }
+.lgPlanPrice span { font-size: 15px; font-weight: 500; opacity: 0.7; letter-spacing: 0; }
+.lgPlanWhat { font-size: 14px; opacity: 0.8; }
+
+.askLg { background: var(--lg-soft); }
+.askLg .askList button { background: #fff; color: var(--lg-ink); border-radius: 12px; box-shadow: 0 0 0 1px #ddd5ff, 0 6px 16px -10px rgba(40, 20, 110, 0.5); }
+.askLg .askList button:hover { box-shadow: 0 0 0 2px var(--lg-violet); }
+.askLg .askList small { color: var(--lg-violet); }
+.askLg .askTitle { letter-spacing: -0.03em; }
+
+/* ---------- shared "ask" band ---------- */
+.askInner { padding: 44px clamp(16px, 4vw, 56px) 120px; max-width: 1100px; }
+.askTitle { margin: 0 0 8px; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.05; }
+.askLede { font-size: 16px; max-width: 60ch; margin-bottom: 18px; }
+.askList { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.askList button {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15.5px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.askList button:focus-visible { outline: 3px solid #2f6be0; outline-offset: 2px; }
+.askList small { font-size: 12.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+
+@media (max-width: 860px) {
+  .nwHero,
+  .lgHero { grid-template-columns: minmax(0, 1fr); }
+  .nwArt { max-width: 440px; }
+  .nwModels,
+  .lgPlans { grid-template-columns: minmax(0, 1fr); }
+  .nwModel + .nwModel { padding-left: 0; box-shadow: inset 0 2px 0 var(--nw-mint); }
+  .nwModel { padding: 20px 0; }
+  .lgInvoice { transform: none; }
+}
+@media (max-width: 640px) {
+  .nwLinks,
+  .lgLinks span:not(.lgSignin) { display: none; }
+  .askList { grid-template-columns: minmax(0, 1fr); }
+  .nwPerks { justify-content: flex-start; }
+}

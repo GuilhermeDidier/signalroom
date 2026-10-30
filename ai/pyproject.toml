@@ -1,0 +1,41 @@
+[project]
+name = "signalroom-ai"
+version = "0.1.0"
+description = "Signalroom ai service: ingestion, hybrid retrieval, PII redaction and the support agent."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "anthropic>=2.3.0",
+    "fastapi>=0.162.0",
+    "fastembed>=0.9.1",
+    "httpx>=0.28.1",
+    "llama-index-core>=0.14.25",
+    "lxml-html-clean>=0.4.6",
+    "numpy>=2.5.4",
+    "pgvector>=0.5.1",
+    "psycopg[binary,pool]>=3.3.6",
+    "pydantic>=2.14.2",
+    "pypdf>=6.21.4",
+    "python-docx>=1.2.0",
+    "python-dotenv>=1.2.4",
+    "readability-lxml>=0.9",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "reportlab>=5.1.0",
+    "ruff>=0.17.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "llm: calls the real Anthropic API (costs money; deselect with -m 'not llm')",
+  "db: needs the local Postgres from docker compose",
+]
+addopts = "-m 'not llm'"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

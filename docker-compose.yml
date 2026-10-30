@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: signalroom
+      POSTGRES_PASSWORD: signalroom
+      POSTGRES_DB: signalroom
+    ports: ["5434:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U signalroom"]
+      interval: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  n8n:
+    image: n8nio/n8n:latest
+    ports: ["5678:5678"]
+    environment:
+      N8N_SECURE_COOKIE: "false"
+      SIGNALROOM_WEBHOOK_SECRET: ${N8N_WEBHOOK_SECRET:-dev-n8n-secret}
+    volumes:
+      - n8ndata:/home/node/.n8n
+      - ./n8n:/workflows:ro
+
+volumes:
+  pgdata:
+  n8ndata:

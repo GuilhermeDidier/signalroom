@@ -1,0 +1,98 @@
+[
+  {
+    "tenant": "ledgerly",
+    "doc": "account-deletion-gdpr",
+    "title": "Account Deletion, Privacy and GDPR",
+    "source_type": "pdf",
+    "file": "files/ledgerly/account-deletion-gdpr.pdf",
+    "mime": "application/pdf"
+  },
+  {
+    "tenant": "ledgerly",
+    "doc": "api-rate-limits",
+    "title": "API Rate Limits, Pagination and Webhooks",
+    "source_type": "docx",
+    "file": "files/ledgerly/api-rate-limits.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  {
+    "tenant": "ledgerly",
+    "doc": "data-export",
+    "title": "Exporting Your Data",
+    "source_type": "pdf",
+    "file": "files/ledgerly/data-export.pdf",
+    "mime": "application/pdf"
+  },
+  {
+    "tenant": "ledgerly",
+    "doc": "plans-and-billing",
+    "title": "Plans and Billing",
+    "source_type": "docx",
+    "file": "files/ledgerly/plans-and-billing.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  {
+    "tenant": "ledgerly",
+    "doc": "refunds",
+    "title": "Refund Policy",
+    "source_type": "pdf",
+    "file": "files/ledgerly/refunds.pdf",
+    "mime": "application/pdf"
+  },
+  {
+    "tenant": "ledgerly",
+    "doc": "sso-saml-setup",
+    "title": "Setting Up SAML Single Sign-On",
+    "source_type": "docx",
+    "file": "files/ledgerly/sso-saml-setup.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  {
+    "tenant": "northwind",
+    "doc": "battery-care-and-safety",
+    "title": "Battery Care and Safety",
+    "source_type": "pdf",
+    "file": "files/northwind/battery-care-and-safety.pdf",
+    "mime": "application/pdf"
+  },
+  {
+    "tenant": "northwind",
+    "doc": "financing",
+    "title": "Financing Your E-Bike",
+    "source_type": "docx",
+    "file": "files/northwind/financing.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  {
+    "tenant": "northwind",
+    "doc": "returns-and-refunds",
+    "title": "Returns and Refunds",
+    "source_type": "pdf",
+    "file": "files/northwind/returns-and-refunds.pdf",
+    "mime": "application/pdf"
+  },
+  {
+    "tenant": "northwind",
+    "doc": "servicing-and-booking",
+    "title": "Servicing and Booking a Workshop Appointment",
+    "source_type": "docx",
+    "file": "files/northwind/servicing-and-booking.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  {
+    "tenant": "northwind",
+    "doc": "shipping-and-delivery",
+    "title": "Shipping and Delivery",
+    "source_type": "pdf",
+    "file": "files/northwind/shipping-and-delivery.pdf",
+    "mime": "application/pdf"
+  },
+  {
+    "tenant": "northwind",
+    "doc": "warranty",
+    "title": "Northwind Cycles Limited Warranty",
+    "source_type": "docx",
+    "file": "files/northwind/warranty.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  }
+]

@@ -1,0 +1,13 @@
+# BuildKit uses this file for `docker build -f api/Dockerfile .` (repo-root context).
+**/node_modules
+**/dist
+**/.env*
+**/*.log
+**/.venv
+**/__pycache__
+**/.next
+web
+ai
+seed
+api/test
+.git

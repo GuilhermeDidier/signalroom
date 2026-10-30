@@ -1,0 +1,245 @@
+.page {
+  min-height: 100vh;
+  padding: 0 var(--gutter);
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 0;
+}
+.notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--face);
+  box-shadow: 0 0 0 1px var(--line-soft);
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.noticeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 6px rgba(234, 162, 26, 0.8);
+}
+.topLink {
+  margin-left: auto;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 56px;
+  align-items: center;
+  padding: 36px 0 48px;
+}
+.pitch {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+.h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(54px, 7.2vw, 104px);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.lede {
+  font-size: 18px;
+  line-height: 1.55;
+  color: #2b3a4d;
+  max-width: 52ch;
+}
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+.ctaNote {
+  font-size: 14px;
+  color: var(--ink-2);
+  max-width: 54ch;
+}
+
+/* The board: an instrument well holding three readouts. */
+.board {
+  margin: 0;
+  padding: 20px 22px 18px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #d3dce6 0%, #dce3eb 100%);
+  box-shadow: inset 0 2px 6px rgba(20, 32, 48, 0.16), inset 0 -1px 0 rgba(255, 255, 255, 0.8),
+    0 0 0 6px #edf1f5, 0 0 0 7px #c3cedb;
+}
+.boardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.threshold {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.threshold b {
+  color: var(--ink);
+}
+.readouts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.readout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--face);
+  box-shadow: var(--shadow-raised);
+}
+.readoutAlarm {
+  background: linear-gradient(90deg, #fbe2de 0%, var(--face) 60%);
+  box-shadow: var(--shadow-raised), inset 4px 0 0 var(--red);
+}
+.readoutLamp {
+  margin-top: 2px;
+}
+.readoutBody {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.q {
+  font-weight: 600;
+}
+.a {
+  color: #34445a;
+  font-size: 14.5px;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 4px;
+  font-size: 13px;
+}
+.cite {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  padding: 8px 0 40px;
+  align-items: start;
+}
+.parts {
+  display: grid;
+  gap: 14px;
+}
+.partList {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 28px;
+}
+.part dt {
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.part dd {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.archWell {
+  display: grid;
+  gap: 12px;
+  background: var(--face);
+  box-shadow: var(--shadow-raised);
+}
+
+.foot {
+  padding: 22px 0 36px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  box-shadow: 0 -1px 0 var(--line-soft);
+}
+
+@media (max-width: 1040px) {
+  .hero,
+  .lower {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+
+@media (max-width: 900px) {
+  .partList {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .top {
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+  .notice {
+    order: 3;
+  }
+  .hero {
+    padding-top: 12px;
+  }
+  .lede {
+    font-size: 16.5px;
+  }
+  .ctas :global(.btn) {
+    flex: 1 1 100%;
+  }
+  .board {
+    padding: 14px 12px;
+  }
+  .readout {
+    gap: 12px;
+    padding: 12px;
+  }
+  .partList {
+    grid-template-columns: 1fr;
+  }
+}
