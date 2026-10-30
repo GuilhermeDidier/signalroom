@@ -1,18 +1,55 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 declare global {
   interface Window {
-    Signalroom?: { open: () => void; close: () => void; toggle: () => void; ask: (text: string) => void };
+    Signalroom?: {
+      key: string;
+      open: () => void;
+      close: () => void;
+      toggle: () => void;
+      ask: (text: string) => void;
+      destroy: () => void;
+    };
   }
 }
 
-export function AskButtons({ questions, className }: { questions: { q: string; tag: string }[]; className: string }) {
+/**
+ * The embed a customer pastes (`<script src="/widget.js" data-key=… async>`), added
+ * from an effect so it follows client-side navigation: React 19 dedupes a rendered
+ * async script by src and never re-runs or removes it, so moving from one demo to the
+ * other kept the first tenant's widget. Leaving the page removes the widget.
+ */
+export function WidgetEmbed({ widgetKey }: { widgetKey: string }) {
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "/widget.js";
+    script.async = true;
+    script.dataset.key = widgetKey;
+    document.body.appendChild(script);
+    return () => {
+      script.remove(); // a widget.js that has not run yet then mounts nothing
+      if (window.Signalroom?.key === widgetKey) window.Signalroom.destroy();
+    };
+  }, [widgetKey]);
+  return null;
+}
+
+export function AskButtons({
+  questions,
+  className,
+  widgetKey,
+}: {
+  questions: { q: string; tag: string }[];
+  className: string;
+  widgetKey: string;
+}) {
   const [waiting, setWaiting] = useState(false);
   function ask(q: string, tries = 0) {
-    if (window.Signalroom) {
+    // Only this page's tenant widget: never ask a widget left over from another page.
+    if (window.Signalroom?.key === widgetKey) {
       setWaiting(false);
       window.Signalroom.ask(q);
     } else if (tries < 40) {

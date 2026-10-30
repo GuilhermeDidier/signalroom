@@ -36,8 +36,11 @@ export function Documents() {
             },
             ctrl.signal,
           );
-        } catch {
-          // stream dropped; retry below
+        } catch (e) {
+          // A 401 is not a dropped stream: the session is gone (api cleared it and the
+          // shell is redirecting to /login), so reconnecting can never succeed.
+          if (e instanceof ApiError && e.status === 401) return;
+          // otherwise the stream dropped; retry below
         }
         if (ctrl.signal.aborted) return;
         setLive("retrying");

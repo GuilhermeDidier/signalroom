@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Logo } from "@/components/Logo";
-import { Empty, WakingUp } from "@/components/States";
+import { Empty, ErrorView, WakingUp } from "@/components/States";
 import { api } from "@/lib/api";
 import { MOCK } from "@/lib/config";
 import { ApiError } from "@/lib/errors";
@@ -30,6 +30,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const session = useSession();
   const [tenantState, setTenantState] = useState<{ tid: string; tenant: Tenant } | null>(null);
   const [asleep, setAsleep] = useState(false);
+  const [tenantErrorState, setTenantErrorState] = useState<{ tid: string; error: ApiError } | null>(null);
   const [retry, setRetry] = useState(0);
 
   const membership = session?.memberships.find((m) => m.tenant_slug === slug) ?? null;
@@ -58,7 +59,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
       .tenant(tid)
       .then((t) => alive && setTenantState({ tid, tenant: t }))
       .catch((e: unknown) => {
-        if (alive && e instanceof ApiError && e.unreachable) setAsleep(true);
+        if (!alive) return;
+        if (e instanceof ApiError && e.unreachable) setAsleep(true);
+        else
+          setTenantErrorState({
+            tid,
+            error: e instanceof ApiError ? e : new ApiError(500, "The workspace didn't load."),
+          });
       });
     return () => {
       alive = false;
@@ -66,6 +73,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [tid, retry]);
 
   const tenant = tenantState && tenantState.tid === tid ? tenantState.tenant : null;
+  // 403/404/500 on the tenant: show it (with retry) instead of loading forever.
+  const tenantError = tenantErrorState && tenantErrorState.tid === tid ? tenantErrorState.error : null;
 
   const ctx = useMemo<TenantContextValue | null>(() => {
     if (!session || !membership) return null;
@@ -166,6 +175,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <WakingUp
                 onReady={() => {
                   setAsleep(false);
+                  setRetry((n) => n + 1);
+                }}
+              />
+            </div>
+          ) : tenantError ? (
+            <div className="panel">
+              <ErrorView
+                error={tenantError}
+                onRetry={() => {
+                  setTenantErrorState(null);
                   setRetry((n) => n + 1);
                 }}
               />

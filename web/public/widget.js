@@ -1,17 +1,23 @@
 /*! Signalroom widget — vanilla, no dependencies.
  * <script src="https://<web>/widget.js" data-key="pk_..." async></script>
  * Injects a chat launcher and an iframe pointing at <web>/embed?key=...
- * API: window.Signalroom.open() / .close() / .toggle() / .ask("question")
+ * API: window.Signalroom.open() / .close() / .toggle() / .ask("question") / .destroy()
+ *      window.Signalroom.key is the data-key of the mounted widget.
+ * One widget per page: loading the same key again is a no-op; a script with a
+ * different key (a single-page app switching tenant) replaces the current widget.
+ * A script tag removed before it ran (e.g. the page that added it unmounted) mounts nothing.
  */
 (function () {
   "use strict";
-  if (window.Signalroom) return;
-  var script =
-    document.currentScript ||
-    document.querySelector('script[src*="widget.js"][data-key]');
-  if (!script) return;
+  var scripts = document.querySelectorAll('script[src*="widget.js"][data-key]');
+  var script = document.currentScript || scripts[scripts.length - 1];
+  if (!script || !script.isConnected) return;
   var key = script.getAttribute("data-key");
   if (!key) return console.warn("[signalroom] missing data-key on the script tag");
+  if (window.Signalroom) {
+    if (window.Signalroom.key === key) return;
+    if (typeof window.Signalroom.destroy === "function") window.Signalroom.destroy();
+  }
   var origin = new URL(script.src, location.href).origin;
   var color = "#1f5fd1";
   var isOpen = false;
@@ -81,7 +87,7 @@
   }
   btn.addEventListener("click", function () { setOpen(!isOpen); });
 
-  window.addEventListener("message", function (e) {
+  function onMessage(e) {
     if (e.origin !== origin || e.source !== frame.contentWindow) return;
     var d = e.data || {};
     if (d.type === "signalroom:ready") {
@@ -95,13 +101,22 @@
     } else if (d.type === "signalroom:close") {
       setOpen(false);
     }
-  });
+  }
+  window.addEventListener("message", onMessage);
 
   function mount() { document.body.appendChild(host); }
   if (document.body) mount();
   else document.addEventListener("DOMContentLoaded", mount);
 
-  window.Signalroom = {
+  var api = {
+    key: key,
+    destroy: function () {
+      window.removeEventListener("message", onMessage);
+      document.removeEventListener("DOMContentLoaded", mount);
+      if (host.parentNode) host.parentNode.removeChild(host); // removes the iframe too
+      queue = [];
+      if (window.Signalroom === api) delete window.Signalroom;
+    },
     open: function () { setOpen(true); },
     close: function () { setOpen(false); },
     toggle: function () { setOpen(!isOpen); },
@@ -110,4 +125,5 @@
       post({ type: "signalroom:ask", text: String(text).slice(0, 2000) });
     },
   };
+  window.Signalroom = api;
 })();

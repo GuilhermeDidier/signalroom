@@ -3,6 +3,11 @@
 Every SQL statement filters on `tenant_id`; there is no code path that reads chunks
 without it (tenant isolation is covered by tests).
 
+Chunks of a `failed` document are never returned: a failed (re)index leaves the
+previous chunks in place, but they no longer match the document, so citing them would
+serve stale content. A (re)index in progress (queued/parsing/chunking/embedding) keeps
+serving the previous chunks until ingest swaps them in one transaction.
+
 Keyword side: `websearch_to_tsquery('english', q)` ranked by `ts_rank_cd` (mode
 "all", the default). The websearch parser ANDs every term, so on its own it misses
 most natural-language questions; inside the hybrid it acts as a high-precision
@@ -74,6 +79,7 @@ _SELECT = (
     "SELECT c.id, c.document_id, d.title AS document_title, c.heading, c.page, c.content,"
     " 1 - (c.embedding <=> %(qvec)s) AS cosine"
     " FROM chunks c JOIN documents d ON d.id = c.document_id AND d.tenant_id = c.tenant_id"
+    " AND d.status <> 'failed'"
 )
 
 _VECTOR_SQL = (

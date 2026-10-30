@@ -10,3 +10,4 @@ __pycache__/
 proposal/
 .DS_Store
 .env.hosted
+.env.render

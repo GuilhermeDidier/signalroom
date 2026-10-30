@@ -2,6 +2,12 @@
 
 Yields (event_name, payload) pairs in the order of the SSE contract:
 meta, token*, tool*, done   (or error).
+
+Only the text of the last model call (the one that does not end in a tool call) is
+the answer. Text a model call writes before a tool call ("Let me look that up") is
+still streamed as it arrives, followed by a paragraph break, but it is left out of
+`done.answer`, the confidence score and the citations; clients render `done.answer`
+as the final text of the turn.
 """
 
 from __future__ import annotations
@@ -20,7 +26,7 @@ from ..config import get_settings
 from ..db import connection
 from ..redaction import redact
 from ..retrieval import hybrid_search
-from ..usage import record_call, remaining_calls
+from ..usage import record_tokens, remaining_calls, reserve_call
 from .client import LLMUnavailable, get_client
 from .prompts import ANSWER_SYSTEM
 from .router import IntentDecision, classify_intent
@@ -36,6 +42,10 @@ CAP_MESSAGE = (
     "Thanks for your message. Our assistant is taking a break right now, so I've passed "
     "your question to the support team and someone will get back to you soon."
 )
+
+
+class UnknownTenant(Exception):
+    """The tenant id does not exist (not a LookupError: KeyError/IndexError are bugs)."""
 
 
 class SearchInput(BaseModel):
@@ -67,7 +77,7 @@ class TurnState:
         self.input_tokens += usage_in
         self.output_tokens += usage_out
         self.model_calls += 1
-        record_call(self.tenant_id, usage_in, usage_out)
+        record_tokens(self.tenant_id, usage_in, usage_out)
 
 
 def _tenant_context(tenant_id: str) -> tuple[str, str]:
@@ -79,7 +89,7 @@ def _tenant_context(tenant_id: str) -> tuple[str, str]:
             (tenant_id,),
         ).fetchall()
     if tenant is None:
-        raise LookupError("unknown tenant")
+        raise UnknownTenant(tenant_id)
     topics = ", ".join(t["title"] for t in titles) or "its products and services"
     return tenant["name"], topics
 
@@ -161,8 +171,11 @@ async def run_turn(
 
     tenant_name, topics = await asyncio.to_thread(_tenant_context, tid)
 
-    # Over the daily cap: no LLM call at all, escalate politely.
-    if await asyncio.to_thread(remaining_calls) < 2:
+    # Over the daily cap: no LLM call at all, escalate politely. A turn needs at least
+    # the router call and one answer call; the router call is reserved atomically here.
+    if await asyncio.to_thread(remaining_calls) < 2 or not await asyncio.to_thread(
+        reserve_call, tid
+    ):
         reason = "daily_llm_cap_reached"
         yield (
             "meta",
@@ -212,9 +225,9 @@ async def run_turn(
         },
     )
 
-    system = ANSWER_SYSTEM.format(
-        tenant=tenant_name, topics=topics, intent=decision.intent, intent_reason=decision.reason
-    )
+    # Only the intent enum goes into the system prompt: the router's free-text reason
+    # is derived from the visitor's message, so it is untrusted (it stays in `meta`).
+    system = ANSWER_SYSTEM.format(tenant=tenant_name, topics=topics, intent=decision.intent)
     messages = _history_messages(history, redacted_message)
     flt = AnswerableFilter()
     answer_parts: list[str] = []
@@ -222,8 +235,10 @@ async def run_turn(
 
     try:
         for _ in range(MAX_MODEL_CALLS):
-            if await asyncio.to_thread(remaining_calls) < 1:
+            if not await asyncio.to_thread(reserve_call, tid):
                 break
+            flt = AnswerableFilter()  # one per model call: its flag is the last call's
+            answer_parts = []
             async with client.messages.stream(
                 model=settings.llm_model,
                 max_tokens=4096,
@@ -246,6 +261,11 @@ async def run_turn(
             tool_uses = [b for b in response.content if b.type == "tool_use"]
             if response.stop_reason != "tool_use" or not tool_uses:
                 break
+            # Text before a tool call is not the answer (see the module docstring).
+            flt.flush()
+            if answer_parts:
+                yield "token", {"text": "\n\n"}
+            answer_parts = []
             results = []
             for block in tool_uses:
                 if block.name in ("create_ticket", "handoff_to_human"):

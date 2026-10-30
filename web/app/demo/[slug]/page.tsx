@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Archivo, Sora } from "next/font/google";
 import { DEMO_WIDGET_KEYS } from "@/lib/config";
-import { AskButtons, DemoHint } from "./DemoClient";
+import { AskButtons, DemoHint, WidgetEmbed } from "./DemoClient";
 import { Bike } from "./Bike";
 import s from "./demo.module.css";
 
@@ -50,12 +50,12 @@ export default async function DemoSite({ params }: PageProps<"/demo/[slug]">) {
           <p className={s.askLede}>
             Our assistant answers from our help articles and shows where each answer came from. Try one of these:
           </p>
-          <AskButtons questions={QUESTIONS[site]} className={s.askList} />
+          <AskButtons questions={QUESTIONS[site]} className={s.askList} widgetKey={key} />
         </div>
       </section>
       <DemoHint slug={site} />
-      {/* The real embed: exactly what a customer pastes into their site. */}
-      <script src="/widget.js" data-key={key} async />
+      {/* The real embed: the same script tag a customer pastes into their site. */}
+      <WidgetEmbed widgetKey={key} />
     </>
   );
 }

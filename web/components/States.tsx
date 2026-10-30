@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { ApiError } from "@/lib/errors";
 import type { Resource } from "@/lib/use-resource";
@@ -57,6 +57,12 @@ export function ErrorView({ error, onRetry }: { error: ApiError; onRetry?: () =>
 export function WakingUp({ onReady, compact = false }: { onReady: () => void; compact?: boolean }) {
   const [elapsed, setElapsed] = useState(0);
   const [gaveUp, setGaveUp] = useState(false);
+  // Callers pass onReady inline; reading it through a ref keeps a parent re-render
+  // (e.g. every keystroke in the widget) from restarting the /health polling.
+  const onReadyRef = useRef(onReady);
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  });
   useEffect(() => {
     let alive = true;
     const started = Date.now();
@@ -64,7 +70,7 @@ export function WakingUp({ onReady, compact = false }: { onReady: () => void; co
     (async () => {
       while (alive && Date.now() - started < 120_000) {
         if (await api.health()) {
-          if (alive) onReady();
+          if (alive) onReadyRef.current();
           return;
         }
         await new Promise((r) => setTimeout(r, 3000));
@@ -75,7 +81,7 @@ export function WakingUp({ onReady, compact = false }: { onReady: () => void; co
       alive = false;
       clearInterval(tick);
     };
-  }, [onReady]);
+  }, []);
   const progress = Math.min(0.95, elapsed / 55);
   return (
     <div className={`waking${compact ? " waking--compact" : ""}`} role="status" aria-live="polite">

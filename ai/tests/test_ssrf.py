@@ -101,3 +101,40 @@ def test_body_over_2mb_is_rejected(monkeypatch):
     )
     with pytest.raises(UnsafeURLError, match="2 MB"):
         safe_fetch.fetch_url("https://public.example.com/big")
+
+
+def test_slow_drip_download_hits_the_total_deadline(monkeypatch):
+    """A server that sends one byte at a time never trips the per-read timeout."""
+    import threading
+    import time
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    class Drip(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            try:
+                for _ in range(60):  # ~3 s in total, 50 ms between bytes
+                    self.wfile.write(b"x")
+                    self.wfile.flush()
+                    time.sleep(0.05)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Drip)
+    port = server.server_address[1]
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    monkeypatch.setattr(safe_fetch, "resolve_public", lambda url: ("127.0.0.1", port, "127.0.0.1"))
+    monkeypatch.setattr(safe_fetch, "TOTAL_DEADLINE", 0.5, raising=False)
+    try:
+        started = time.monotonic()
+        with pytest.raises(UnsafeURLError, match="took longer"):
+            safe_fetch.fetch_url(f"http://127.0.0.1:{port}/slow")
+        assert time.monotonic() - started < 2
+    finally:
+        server.shutdown()
+        server.server_close()

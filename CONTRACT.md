@@ -58,7 +58,8 @@ All endpoints except `/health` require `X-Internal-Token`.
   Message is redacted FIRST; nothing unredacted reaches the LLM (history is already-redacted text from DB).
   Events (each `event: <name>\ndata: <json>\n\n`):
   - `meta` `{"intent", "intent_reason", "redacted_message", "redactions": [...]}`
-  - `token` `{"text"}` — streamed answer text, with citation markers like `[1]`
+  - `token` `{"text"}` — streamed answer text, with citation markers like `[1]` (text the model writes before a tool
+    call is streamed too, then a `"\n\n"` token, but it is not part of `done.answer`; render `done.answer` as final)
   - `tool` `{"name": "create_ticket"|"handoff_to_human", "input": {...}}` (informational)
   - `done` `{"answer", "intent", "confidence", "confidence_breakdown": {...}, "citations": [{"n","chunk_id","document_id","document_title","heading","page","snippet"}], "escalate": bool, "escalation_reason": str|null, "ticket": {"subject","summary","priority"}|null, "usage": {"input_tokens","output_tokens"}}`
   - `error` `{"message"}`

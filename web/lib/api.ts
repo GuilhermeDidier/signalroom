@@ -229,6 +229,7 @@ const httpApi: Api = {
       if (signal.aborted) return;
       throw e instanceof Error ? new ApiError(0, e.message) : new ApiError(0, "Stream failed.");
     }
+    if (res.status === 401) setSession(null); // same as request(): the shell redirects to /login
     if (!res.ok || !res.body) throw new ApiError(res.status, `Live status stream failed (${res.status}).`);
     for await (const msg of readSse(res.body)) {
       if (msg.event !== "documents") continue;

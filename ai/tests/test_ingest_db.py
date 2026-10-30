@@ -101,3 +101,31 @@ def test_ingest_endpoint(scratch_tenant):
     )
     missing = "00000000-0000-0000-0000-000000000000"
     assert client.post("/ingest", json={"document_id": missing}, headers=headers).status_code == 404
+
+
+def test_failed_reindex_does_not_serve_stale_chunks(scratch_tenant):
+    from signalroom_ai.retrieval import hybrid_search
+
+    tid = scratch_tenant()
+    doc_id = add_document(
+        tid,
+        "Returns",
+        "text",
+        b"# Returns\n\nReturns of the plorbix frame are accepted within 30 days of delivery.",
+    )
+    ingest_document(doc_id)
+    assert {h.document_id for h in hybrid_search(tid, "plorbix returns", k=5)} == {doc_id}
+
+    # While a reindex runs, the old chunks keep answering until the atomic swap.
+    with connection() as conn:
+        conn.execute("UPDATE documents SET status = 'embedding' WHERE id = %s", (doc_id,))
+    assert {h.document_id for h in hybrid_search(tid, "plorbix returns", k=5)} == {doc_id}
+
+    # The new content cannot be indexed: the reindex fails and the old chunks stay in
+    # the table, but they no longer describe the document and must not be cited.
+    with connection() as conn:
+        conn.execute("UPDATE documents SET content = %s WHERE id = %s", (b"   ", doc_id))
+    with pytest.raises(BadDocument):
+        ingest_document(doc_id)
+    assert _doc_row(doc_id)["status"] == "failed" and _chunks(doc_id)
+    assert hybrid_search(tid, "plorbix returns", k=5) == []

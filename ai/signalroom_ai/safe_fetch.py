@@ -7,13 +7,17 @@ Rules:
 - the connection goes to the vetted IP (TLS still verifies the real hostname via
   SNI), so a DNS answer cannot change between the check and the request (rebinding);
 - redirects are followed by hand, at most 3, each hop re-validated;
-- the body is streamed and cut at 2 MB; connect/read timeouts are short.
+- the body is streamed and cut at 2 MB; connect/read timeouts are short;
+- the whole fetch (every hop + the body) has a wall-clock deadline, checked between
+  received chunks, so a server dripping one byte per read cannot hold the ingest
+  slot forever (worst case: TOTAL_DEADLINE + one read timeout).
 """
 
 from __future__ import annotations
 
 import ipaddress
 import socket
+import time
 from dataclasses import dataclass
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
@@ -23,6 +27,7 @@ MAX_BYTES = 2 * 1024 * 1024
 MAX_REDIRECTS = 3
 ALLOWED_PORTS = {80, 443, 8080, 8443}
 TIMEOUT = httpx.Timeout(10.0, connect=5.0)
+TOTAL_DEADLINE = 30.0  # seconds for the whole download, redirects included
 USER_AGENT = "SignalroomBot/0.1 (+knowledge-base ingestion)"
 
 _CGNAT = ipaddress.ip_network("100.64.0.0/10")
@@ -107,9 +112,16 @@ def _pinned_request(client: httpx.Client, url: str) -> httpx.Response:
 
 
 def fetch_url(url: str) -> FetchedPage:
+    deadline = time.monotonic() + TOTAL_DEADLINE
+
+    def check_deadline() -> None:
+        if time.monotonic() > deadline:
+            raise UnsafeURLError(f"download took longer than {TOTAL_DEADLINE:g} s")
+
     with httpx.Client(timeout=TIMEOUT, follow_redirects=False) as client:
         current = url
         for _ in range(MAX_REDIRECTS + 1):
+            check_deadline()
             response = _pinned_request(client, current)
             try:
                 if response.is_redirect:
@@ -128,6 +140,7 @@ def fetch_url(url: str) -> FetchedPage:
                     body.extend(chunk)
                     if len(body) > MAX_BYTES:
                         raise UnsafeURLError("document is larger than 2 MB")
+                    check_deadline()
                 content_type = response.headers.get("content-type", "").split(";")[0].strip()
                 return FetchedPage(url=current, content_type=content_type.lower(), body=bytes(body))
             finally:

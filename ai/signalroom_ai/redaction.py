@@ -6,10 +6,18 @@ within one text, so the model can still tell "the same card twice" from "two car
 
 Validation keeps false positives down:
 - CARD: 13-19 digits that pass the Luhn checksum (order numbers usually do not).
-- IBAN: country code + check digits that pass ISO 13616 mod-97.
+- IBAN: country code + check digits that pass ISO 13616 mod-97, any letter case. When a
+  match does not validate, trailing space-separated groups are dropped one at a time
+  (the regex can swallow a short word after the IBAN, e.g. "... 3201 thanks").
 - IP: four octets, each 0-255.
 - SSN: US format NNN-NN-NNNN, excluding the ranges the SSA never issues.
-- PHONE: 7-15 digits with phone-style grouping; ISO dates are not phones.
+- PHONE: 7-15 digits with phone-style grouping; ISO dates are not phones. Without
+  separators it takes a leading "+" (E.164, 7-15 digits), a parenthesized area code
+  ("(415)5550100"), or a bare run of 10-13 digits. A bare run right after an id label
+  ("order", "invoice", "tracking", "ticket", "#", ...) is an id, not a phone. Card
+  numbers are found first, so a Luhn-valid run is a CARD; ISO dates and short ids
+  (under 10 digits) never match. Other bare 10-13 digit ids (e.g. an unlabelled
+  Unix timestamp) are redacted as phones: over-redacting an id is the cheaper error.
 """
 
 from __future__ import annotations
@@ -21,15 +29,24 @@ from dataclasses import dataclass, field
 PII_TYPES = ("EMAIL", "IBAN", "CARD", "SSN", "IP", "PHONE")
 
 _EMAIL = re.compile(r"(?<![\w.+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![\w-])")
-_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b")
+_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b", re.IGNORECASE)
 _CARD = re.compile(r"(?<![\d-])(?:\d[ -]?){12,18}\d(?![\d-])")
 _SSN = re.compile(r"(?<![\d-])(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}(?![\d-])")
 _IP = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])")
 _PHONE = re.compile(
     r"(?<![\w+])(?<!\d[ .-])"
-    r"(?:\+\d{1,3}[ .-]?)?(?:\(\d{1,4}\)[ .-]?)?"
-    r"\d{2,4}(?:[ .-]\d{2,4}){1,4}"
+    r"(?:"
+    r"(?:\+\d{1,3}[ .-]?)?(?:\(\d{1,4}\)[ .-]?)?\d{2,4}(?:[ .-]\d{2,4}){1,4}"  # grouped
+    r"|(?:\+\d{1,3}[ .-]?)?\(\d{1,4}\)[ .-]?\d{6,10}"  # (415)5550100
+    r"|\+\d{1,3}[ .-]?\d{6,14}"  # +14155550100, +55 83999998888
+    r"|\d{10,13}"  # 83999998888 (bare: see _phone_len)
+    r")"
     r"(?![ .-]?\d)"
+)
+_ID_LABEL = re.compile(
+    r"(?:#|\b(?:order|invoice|inv|ref|reference|tracking|ticket|case|confirmation|po|"
+    r"sku|serial|id)\b(?:\s*(?:number|no\.?|nr\.?|num\.?|id))?)\s*[:#]?\s*$",
+    re.IGNORECASE,
 )
 _ISO_DATE = re.compile(r"^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}$")
 
@@ -59,6 +76,25 @@ def iban_valid(raw: str) -> bool:
     return int(numeric) % 97 == 1
 
 
+# A validator gets the regex match and returns how many leading characters of it are
+# PII (0 = none), so a detector can redact a valid prefix of an over-long match.
+Validator = Callable[[re.Match[str]], int]
+
+
+def _whole(ok: Callable[[str], bool]) -> Validator:
+    return lambda m: len(m.group(0)) if ok(m.group(0)) else 0
+
+
+def _iban_len(m: re.Match[str]) -> int:
+    candidate = m.group(0)
+    while True:
+        if iban_valid(candidate):
+            return len(candidate)
+        if " " not in candidate:
+            return 0
+        candidate = candidate.rsplit(" ", 1)[0]
+
+
 def _card_ok(m: str) -> bool:
     digits = re.sub(r"[ -]", "", m)
     return 13 <= len(digits) <= 19 and luhn_valid(digits)
@@ -68,20 +104,23 @@ def _ip_ok(m: str) -> bool:
     return all(int(p) <= 255 for p in m.split("."))
 
 
-def _phone_ok(m: str) -> bool:
-    if _ISO_DATE.match(m):
-        return False
-    n = sum(c.isdigit() for c in m)
-    return 7 <= n <= 15
+def _phone_len(m: re.Match[str]) -> int:
+    value = m.group(0)
+    if _ISO_DATE.match(value):
+        return 0
+    if value.isdigit() and _ID_LABEL.search(m.string, 0, m.start()):
+        return 0  # "order 4815162342": an id, not a phone
+    n = sum(c.isdigit() for c in value)
+    return len(value) if 7 <= n <= 15 else 0
 
 
-_DETECTORS: list[tuple[str, re.Pattern[str], Callable[[str], bool]]] = [
-    ("EMAIL", _EMAIL, lambda m: True),
-    ("IBAN", _IBAN, iban_valid),
-    ("CARD", _CARD, _card_ok),
-    ("SSN", _SSN, lambda m: True),
-    ("IP", _IP, _ip_ok),
-    ("PHONE", _PHONE, _phone_ok),
+_DETECTORS: list[tuple[str, re.Pattern[str], Validator]] = [
+    ("EMAIL", _EMAIL, _whole(lambda m: True)),
+    ("IBAN", _IBAN, _iban_len),
+    ("CARD", _CARD, _whole(_card_ok)),
+    ("SSN", _SSN, _whole(lambda m: True)),
+    ("IP", _IP, _whole(_ip_ok)),
+    ("PHONE", _PHONE, _phone_len),
 ]
 
 
@@ -95,17 +134,18 @@ class RedactionResult:
         return [{"type": t, "count": self.counts[t]} for t in PII_TYPES if self.counts.get(t)]
 
 
-def _replacer(kind: str, ok: Callable[[str], bool], counts: dict[str, int]):
+def _replacer(kind: str, ok: Validator, counts: dict[str, int]):
     seen: dict[str, str] = {}
 
     def _sub(match: re.Match[str]) -> str:
-        value = match.group(0)
-        if not ok(value):
-            return value
+        n = ok(match)
+        if not n:
+            return match.group(0)
+        value, rest = match.group(0)[:n], match.group(0)[n:]
         if value not in seen:
             seen[value] = f"[{kind}_{len(seen) + 1}]"
         counts[kind] = counts.get(kind, 0) + 1
-        return seen[value]
+        return seen[value] + rest
 
     return _sub
 

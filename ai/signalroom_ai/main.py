@@ -14,7 +14,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from .agent.chat import run_turn
+from .agent.chat import UnknownTenant, run_turn
 from .auth import require_internal_token
 from .config import EMBEDDING_MODEL, get_settings
 from .db import close_pool, get_pool
@@ -120,7 +120,7 @@ async def chat(req: ChatRequest) -> StreamingResponse:
                 req.confidence_threshold,
             ):
                 yield _sse(name, payload)
-        except LookupError:
+        except UnknownTenant:
             yield _sse("error", {"message": "unknown tenant"})
         except Exception:
             log.exception("chat turn failed")

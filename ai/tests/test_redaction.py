@@ -1,3 +1,5 @@
+import pytest
+
 from signalroom_ai.redaction import iban_valid, luhn_valid, redact
 
 
@@ -55,3 +57,50 @@ def test_dates_prices_and_skus_are_not_pii():
 
 def test_text_without_pii_is_unchanged():
     assert redact("How long is the warranty?").redacted == "How long is the warranty?"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "call +14155550100 now",  # E.164, no separators
+        "my number: 83999998888",  # Brazilian mobile, unseparated
+        "ring (415)5550100 today",  # area code in parentheses, rest unseparated
+        "whatsapp +55 83999998888",
+        "it's 4155550100.",
+    ],
+)
+def test_unseparated_phone_numbers_are_redacted(text):
+    r = redact(text)
+    assert r.counts == {"PHONE": 1}, r.redacted
+    assert "[PHONE_1]" in r.redacted
+    assert not any(ch.isdigit() for ch in r.redacted.replace("[PHONE_1]", ""))
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "order #4815162342 never arrived",
+        "Order No. 4815162342 never arrived",
+        "invoice 20260314123 is wrong",
+        "tracking number 940011189922385 is stuck",
+        "ticket: 1234567890",
+    ],
+)
+def test_labelled_long_ids_are_not_phones(text):
+    assert redact(text).redacted == text
+
+
+def test_unseparated_card_is_still_a_card():
+    r = redact("card 4111111111111111 please")
+    assert r.redacted == "card [CARD_1] please" and r.counts == {"CARD": 1}
+
+
+def test_lowercase_iban_is_redacted_whole():
+    r = redact("refund to gb82 west 1234 5698 7654 32 please")
+    assert r.redacted == "refund to [IBAN_1] please"
+    assert r.counts == {"IBAN": 1}
+
+
+def test_iban_followed_by_a_word_keeps_the_word():
+    r = redact("send it to AT61 1904 3002 3457 3201 thanks")
+    assert r.redacted == "send it to [IBAN_1] thanks"
