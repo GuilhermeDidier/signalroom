@@ -1,3 +1,5 @@
+# Full stack: docker compose up --build   (then seed: see README)
+# Needs ANTHROPIC_API_KEY in the repo-root .env.
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -18,12 +20,53 @@ services:
     image: redis:7-alpine
     ports: ["6379:6379"]
 
+  ai:
+    build: ./ai
+    environment:
+      DATABASE_URL: postgres://signalroom:signalroom@postgres:5432/signalroom
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-dev-internal-token}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY in .env}
+      LLM_MODEL: ${LLM_MODEL:-claude-sonnet-5-5}
+      ROUTER_MODEL: ${ROUTER_MODEL:-claude-haiku-5-5}
+    ports: ["8000:8000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    environment:
+      DATABASE_URL: postgres://signalroom:signalroom@postgres:5432/signalroom
+      REDIS_URL: redis://redis:6379
+      AI_URL: http://ai:8000
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-dev-internal-token}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-me}
+      DEMO_MODE: "true"
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-signalroom-demo}
+      CORS_ORIGINS: http://localhost:3000
+      WEB_URL: http://localhost:3000
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/signalroom-escalation
+      N8N_WEBHOOK_SECRET: ${N8N_WEBHOOK_SECRET:-dev-n8n-secret}
+    ports: ["4000:4000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_started }
+      ai: { condition: service_started }
+
+  web:
+    build: ./web
+    ports: ["3000:3000"]
+    depends_on: [api]
+
   n8n:
     image: n8nio/n8n:latest
     ports: ["5678:5678"]
     environment:
       N8N_SECURE_COOKIE: "false"
       SIGNALROOM_WEBHOOK_SECRET: ${N8N_WEBHOOK_SECRET:-dev-n8n-secret}
+      NODE_FUNCTION_ALLOW_BUILTIN: crypto
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
     volumes:
       - n8ndata:/home/node/.n8n
       - ./n8n:/workflows:ro

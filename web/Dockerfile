@@ -1,0 +1,23 @@
+# NEXT_PUBLIC_* values are inlined at build time, so they are build args.
+FROM node:22-slim AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+ARG NEXT_PUBLIC_API_URL=http://localhost:4000
+ARG NEXT_PUBLIC_WEB_URL=http://localhost:3000
+ARG NEXT_PUBLIC_WIDGET_KEY_NORTHWIND=pk_demo_northwind
+ARG NEXT_PUBLIC_WIDGET_KEY_LEDGERLY=pk_demo_ledgerly
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL NEXT_PUBLIC_WEB_URL=$NEXT_PUBLIC_WEB_URL \
+    NEXT_PUBLIC_WIDGET_KEY_NORTHWIND=$NEXT_PUBLIC_WIDGET_KEY_NORTHWIND \
+    NEXT_PUBLIC_WIDGET_KEY_LEDGERLY=$NEXT_PUBLIC_WIDGET_KEY_LEDGERLY \
+    NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+FROM node:22-slim
+WORKDIR /app
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
+COPY --from=build /app ./
+USER node
+EXPOSE 3000
+CMD ["npm", "start"]

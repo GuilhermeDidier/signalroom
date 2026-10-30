@@ -1,0 +1,65 @@
+# Render Blueprint: api (NestJS + BullMQ worker) and ai (FastAPI) on the free plan,
+# Redis via Render Key Value. Postgres + pgvector is external (Supabase): set DATABASE_URL.
+services:
+  - type: web
+    name: signalroom-api
+    runtime: docker
+    plan: free
+    region: virginia
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        fromService: { type: keyvalue, name: signalroom-redis, property: connectionString }
+      - key: AI_URL
+        fromService: { type: web, name: signalroom-ai, envVarKey: RENDER_EXTERNAL_URL }
+      - key: INTERNAL_TOKEN
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEMO_MODE
+        value: "true"
+      - key: DEMO_PASSWORD
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: WEB_URL
+        sync: false
+      - key: TRUST_PROXY
+        value: "1"
+      - key: N8N_WEBHOOK_URL
+        sync: false
+      - key: N8N_WEBHOOK_SECRET
+        generateValue: true
+
+  - type: web
+    name: signalroom-ai
+    runtime: docker
+    plan: free
+    region: virginia
+    dockerfilePath: ./ai/Dockerfile
+    dockerContext: ./ai
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: INTERNAL_TOKEN
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: claude-sonnet-5-5
+      - key: ROUTER_MODEL
+        value: claude-haiku-5-5
+      - key: DAILY_LLM_CALL_CAP
+        value: "300"
+
+  - type: keyvalue
+    name: signalroom-redis
+    plan: free
+    region: virginia
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
